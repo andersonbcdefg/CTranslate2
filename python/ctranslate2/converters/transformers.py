@@ -43,6 +43,7 @@ class TransformersConverter(Converter):
     def __init__(
         self,
         model_name_or_path: str,
+        tokenizer_name_or_path: Optional[str] = None,
         activation_scales: Optional[str] = None,
         copy_files: Optional[List[str]] = None,
         load_as_float16: bool = False,
@@ -69,6 +70,7 @@ class TransformersConverter(Converter):
           trust_remote_code: Allow converting models using custom code.
         """
         self._model_name_or_path = model_name_or_path
+        self._tokenizer_name_or_path = tokenizer_name_or_path if tokenizer_name_or_path is not None else model_name_or_path
         self._activation_scales = activation_scales
         self._copy_files = copy_files
         self._load_as_float16 = load_as_float16
@@ -82,7 +84,7 @@ class TransformersConverter(Converter):
 
         with torch.no_grad():
             config = transformers.AutoConfig.from_pretrained(
-                self._model_name_or_path, trust_remote_code=self._trust_remote_code
+                self._model_name_or_path, trust_remote_code=True
             )
 
             config_name = config.__class__.__name__
@@ -112,7 +114,7 @@ class TransformersConverter(Converter):
 
             tokenizer = self.load_tokenizer(
                 tokenizer_class,
-                self._model_name_or_path,
+                self._tokenizer_name_or_path,
             )
 
             spec = loader(model, tokenizer)
